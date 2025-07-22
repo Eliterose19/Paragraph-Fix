@@ -319,7 +319,7 @@ const modifier = (text) => {
   // Your other context modifier scripts go here (preferred)
   text = ParagraphFix("context", text);
   // Your other context modifier scripts go here (alternative)
-  return {text, stop};
+  return {text};
 };
 modifier(text);
 ````
