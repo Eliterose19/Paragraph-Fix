@@ -10,6 +10,67 @@ The Paragraph Fix is an AI Dungeon scenario script that automatically configures
   3. Newline dialogue formatting (basic + newlines before quotes)
 - Indentation (Adds 4-space indents to new paragraphs)
 - Complex edge-case handling to keep formatting consistent even with strange AI output.
+## Examples
+Here is an example of a generated response run through each of the three formatting modes (`basic`, `empty-line`, `newline`).
+### Original Input
+```
+You step into the quiet tavern. The scent of smoke and ale clings to the air.
+"Is anyone here?" you whisper.
+
+A chair creaks somewhere in the back. "Over here," a voice replies.
+You move closer, heart pounding. "Show yourself."
+The shadows shift. "You don’t remember me, do you?" the figure says, stepping into the light.
+```
+### Basic Formatting
+```
+You step into the quiet tavern. The scent of smoke and ale clings to the air.
+
+"Is anyone here?" you whisper.
+
+A chair creaks somewhere in the back. "Over here," a voice replies.
+
+You move closer, heart pounding. "Show yourself."
+
+The shadows shift. "You don’t remember me, do you?" the figure says, stepping into the light.
+```
+### Empty-Line Dialogue Formatting
+```
+You step into the quiet tavern. The scent of smoke and ale clings to the air.
+
+"Is anyone here?" you whisper.
+
+A chair creaks somewhere in the back.
+
+"Over here," a voice replies.
+
+You move closer, heart pounding.
+
+"Show yourself."
+
+The shadows shift.
+
+"You don’t remember me, do you?" the figure says, stepping into the light.
+```
+### Newline Dialogue Formatting
+```
+You step into the quiet tavern. The scent of smoke and ale clings to the air.
+
+"Is anyone here?" you whisper.
+
+A chair creaks somewhere in the back.
+
+"Over here,"
+a voice replies.
+
+You move closer, heart pounding.
+
+"Show yourself."
+
+The shadows shift.
+
+"You don’t remember me, do you?"
+the figure says, stepping into the light.
+```
 # Scenario Script Installation Guide
 1. Use the [AI Dungeon website](https://aidungeon.com/) on PC (or view as desktop if mobile-only)
 2. [Create a new scenario](https://help.aidungeon.com/faq/what-are-scenarios) or edit one of your existing scenarios
