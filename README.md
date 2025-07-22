@@ -18,7 +18,7 @@ The Paragraph Fix is an AI Dungeon scenario script that automatically configures
 5. Select the Input tab on the left
 6. Delete all code within said tab
 7. Copy and paste the following code into your empty Input tab:
-```
+````js
 // Paragraph Fix Script (Eliterose's version)
 // Uses Bin's Paragraph Fix formatting options and LewdLeah's suggestions
 function ParagraphFix(hook, inputText) {
@@ -309,11 +309,11 @@ function ParagraphFix(hook, inputText) {
             return inputText;
     }
 }
-```
+````
 8. Select the Context tab on the left
 9. Delete all code within said tab
 10. Copy and paste the following code into your empty Context tab:
-```
+````js
 // Your "Context" tab should look like this
 const modifier = (text) => {
   // Your other context modifier scripts go here (preferred)
@@ -322,11 +322,11 @@ const modifier = (text) => {
   return {text, stop};
 };
 modifier(text);
-```
+````
 11. Select the Output tab on the left
 12. Delete all code within said tab
 13. Copy and paste the following code into your empty Output tab:
-```
+````js
 // Your "Output" tab should look like this
 const modifier = (text) => {
   // Your other output modifier scripts go here (preferred)
@@ -335,7 +335,10 @@ const modifier = (text) => {
   return {text};
 };
 modifier(text);
-```
+````
 14. Click the big yellow SAVE button in the top right corner
 15. And you're done!
 16. Keep in mind that any adventures played from your scenario will include Auto-Cards (this also applies retroactively)
+## Additional Resources
+### My AI Dungeon Profile
+- [Eliterose](https://play.aidungeon.com/profile/Eliterose)
