@@ -11,16 +11,19 @@ The Paragraph Fix is an AI Dungeon scenario script that automatically configures
 - Indentation (Adds 4-space indents to new paragraphs)
 - Complex edge-case handling to keep formatting consistent even with strange AI output.
 # Scenario Script Installation Guide
-1. Use the AI Dungeon website on PC (or view as desktop if mobile-only)
-2. Create a new scenario or edit one of your existing scenarios
-3. Open the DETAILS tab at the top while editing your scenario
-4. Scroll to the bottom and select EDIT SCRIPTS
-5. Select the Input tab on the left
+1. Use the [AI Dungeon website](https://aidungeon.com/) on PC (or view as desktop if mobile-only)
+2. [Create a new scenario](https://help.aidungeon.com/faq/what-are-scenarios) or edit one of your existing scenarios
+3. Open the ```DETAILS``` tab at the top while editing your scenario
+4. Scroll to the bottom and select ```EDIT SCRIPTS```
+5. Select the ```Library``` tab on the left
 6. Delete all code within said tab
-7. Copy and paste the following code into your empty Input tab:
+7. Copy and paste the following code into your empty ```Library``` tab:
 ````js
+// Your "Library" tab should look like this
+/*
 // Paragraph Fix Script (Eliterose's version)
 // Uses Bin's Paragraph Fix formatting options and LewdLeah's suggestions
+*/
 function ParagraphFix(hook, inputText) {
     "use strict";
     
@@ -310,9 +313,9 @@ function ParagraphFix(hook, inputText) {
     }
 }
 ````
-8. Select the Context tab on the left
+8. Select the ```Context``` tab on the left
 9. Delete all code within said tab
-10. Copy and paste the following code into your empty Context tab:
+10. Copy and paste the following code into your empty ```Context``` tab:
 ````js
 // Your "Context" tab should look like this
 const modifier = (text) => {
@@ -323,9 +326,9 @@ const modifier = (text) => {
 };
 modifier(text);
 ````
-11. Select the Output tab on the left
+11. Select the ```Output``` tab on the left
 12. Delete all code within said tab
-13. Copy and paste the following code into your empty Output tab:
+13. Copy and paste the following code into your empty ```Output``` tab:
 ````js
 // Your "Output" tab should look like this
 const modifier = (text) => {
@@ -336,9 +339,9 @@ const modifier = (text) => {
 };
 modifier(text);
 ````
-14. Click the big yellow SAVE button in the top right corner
+14. Click the big yellow ```SAVE``` button in the top right corner
 15. And you're done!
-16. Keep in mind that any adventures played from your scenario will include Auto-Cards (this also applies retroactively)
+16. Keep in mind that any adventures played from your scenario will include the Paragraph Fix (this also applies retroactively)
 ## Additional Resources
 ### My AI Dungeon Profile
 - [Eliterose](https://play.aidungeon.com/profile/Eliterose)
