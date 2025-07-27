@@ -404,5 +404,7 @@ modifier(text);
 15. And you're done!
 16. Keep in mind that any adventures played from your scenario will include the Paragraph Fix (this also applies retroactively)
 ## Additional Resources
+### Simple Test Scenario
+- [Paragraph Fix](https://play.aidungeon.com/scenario/ltX9eOIT1KHe/modular-scripting-base-paragraph-fix-suggestions-and-feedback)
 ### My AI Dungeon Profile
 - [Eliterose](https://play.aidungeon.com/profile/Eliterose)
