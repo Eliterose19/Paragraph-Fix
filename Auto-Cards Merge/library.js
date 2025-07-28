@@ -5970,8 +5970,11 @@ function AutoCards(inHook, inText, inStop) {
 
 // Your other library scripts go here
 
+// Your "Library" tab should look like this
+/*
 // Paragraph Fix Script (Eliterose's version)
 // Uses Bin's Paragraph Fix formatting options and LewdLeah's suggestions
+*/
 function ParagraphFix(hook, inputText) {
     "use strict";
     
