@@ -84,6 +84,7 @@ the figure says, stepping into the light.
 /*
 // Paragraph Fix Script (Eliterose's version)
 // Uses Bin's Paragraph Fix formatting options and LewdLeah's suggestions
+// Input newlines added based on Grand Wizard Noticer's suggestion and solution
 */
 function ParagraphFix(hook, inputText) {
     "use strict";
@@ -91,6 +92,8 @@ function ParagraphFix(hook, inputText) {
     // Default settings
     const DEFAULT_FORMATTING_TYPE = "none"; // "none", "basic", "empty-line", "newline"
     const DEFAULT_INDENT_PARAGRAPHS = false;
+    const DEFAULT_STORY_MODE_FORMATTING = false; // Applies full formatting pipeline to user input in Story mode
+    const DEFAULT_INPUT_NEWLINES = "none"; // "none", "prepend", "append", "both" // Applies newlines to the beggining or end of story actions
     
     // Initialize or retrieve state
     const PF = (function() {
@@ -101,7 +104,9 @@ function ParagraphFix(hook, inputText) {
         }
         return {
             formattingType: DEFAULT_FORMATTING_TYPE,
-            indentParagraphs: DEFAULT_INDENT_PARAGRAPHS
+            indentParagraphs: DEFAULT_INDENT_PARAGRAPHS,
+            storyModeFormatting: DEFAULT_STORY_MODE_FORMATTING,
+            inputNewlines: DEFAULT_INPUT_NEWLINES
         };
     })();
     
@@ -117,7 +122,7 @@ function ParagraphFix(hook, inputText) {
             type: action.type || "unknown"
         };
     }
-    
+
     function adjustNewlines(text) {
         if (PF.formattingType === "none") {
             return text;
@@ -153,7 +158,7 @@ function ParagraphFix(hook, inputText) {
         
         return text;
     }
-    
+
     function getConfigCardTemplate() {
         return {
             type: "class",
@@ -161,14 +166,18 @@ function ParagraphFix(hook, inputText) {
             keys: "Edit the entry above to configure the Paragraph Fix",
             entry: "> The Paragraph Fix ensures consistent spacing in your adventure. You may configure the following settings by replacing the current values with your desired options.\n" +
                    "> Formatting Type: " + PF.formattingType + "\n" +
-                   "> Indent Paragraphs: " + PF.indentParagraphs + "\n\n" +
+                   "> Indent Paragraphs: " + PF.indentParagraphs + "\n" +
+                   "> Story Mode Formatting: " + PF.storyModeFormatting + "\n" +
+                   "> Input Newlines: " + PF.inputNewlines + "\n\n" +
                    "> Available formatting types:\n" +
                    "> - none: No formatting applied\n" +
                    "> - basic: Basic formatting (converts multiple spaces/newlines to double newlines)\n" +
                    "> - empty-line: Empty line dialogue formatting (adds spacing before quotes except after commas)\n" +
                    "> - newline: Newline dialogue formatting (basic + newlines before quotes)\n\n" +
-                   "> Indent Paragraphs adds 4-space indents to new paragraphs",
-            description: "The Paragraph Fix automatically applies consistent spacing and dialogue formatting to your story output. Set formatting type to 'none' to disable all formatting, and set indent paragraphs to 'true' or 'false' to control paragraph indentation."
+                   "> Indent Paragraphs adds 4-space indents to new paragraphs\n" +
+                   "> Input Newlines controls \\n\\n placement on user input: none, prepend (before text), append (after text), or both\n" +
+                   "> Story Mode Formatting applies the full formatting pipeline to user input in Story mode",
+            description: "The Paragraph Fix automatically applies consistent spacing and dialogue formatting to your story output. Set formatting type to 'none' to disable all formatting, and set indent paragraphs to 'true' or 'false' to control paragraph indentation. Story Mode Formatting applies the full formatting pipeline to Story mode user input. Prepend Input Newlines ensures user input starts or ends on its own paragraph in Story mode."
         };
     }
     
@@ -199,8 +208,25 @@ function ParagraphFix(hook, inputText) {
                     settings.indentParagraphs = false;
                 }
             }
+
+            if (key.includes("story") && key.includes("mode")) {
+                const trueValues = ["true", "t", "yes", "y", "on"];
+                const falseValues = ["false", "f", "no", "n", "off"];
+                if (trueValues.includes(value)) {
+                    settings.storyModeFormatting = true;
+                } else if (falseValues.includes(value)) {
+                    settings.storyModeFormatting = false;
+                }
+            }
+
+            if (key.includes("input") && key.includes("newlines")) {
+                const validTypes = ["none", "prepend", "append", "both"];
+                if (validTypes.includes(value)) {
+                    settings.inputNewlines = value;
+                }
+            }
         }
-        
+
         return settings;
     }
     
@@ -247,26 +273,20 @@ function ParagraphFix(hook, inputText) {
                 }
             }
         } else {
-            // Repair existing card if needed
-            let needsRepair = false;
-            
             // If title matches but keys don't, repair the keys
             if (configCard.title === template.title && configCard.keys !== template.keys) {
                 configCard.keys = template.keys;
-                needsRepair = true;
             }
             
             // If keys match but title doesn't, repair the title
             if (configCard.keys === template.keys && configCard.title !== template.title) {
                 configCard.title = template.title;
-                needsRepair = true;
             }
             
             // If partial matches, repair both title and keys
             if (configCard.title !== template.title && configCard.keys !== template.keys) {
                 configCard.title = template.title;
                 configCard.keys = template.keys;
-                needsRepair = true;
             }
             
             // Always update the template parts but preserve user's settings
@@ -277,7 +297,13 @@ function ParagraphFix(hook, inputText) {
             if (typeof userSettings.indentParagraphs === "boolean") {
                 PF.indentParagraphs = userSettings.indentParagraphs;
             }
-            
+            if (typeof userSettings.storyModeFormatting === "boolean") {
+                PF.storyModeFormatting = userSettings.storyModeFormatting;
+            }
+            if (userSettings.inputNewlines) {
+                PF.inputNewlines = userSettings.inputNewlines;
+            }
+
             // Update with current settings
             const updatedTemplate = getConfigCardTemplate();
             configCard.entry = updatedTemplate.entry;
@@ -345,7 +371,29 @@ function ParagraphFix(hook, inputText) {
             
             state.ParagraphFix = PF;
             return contextResult;
-            
+
+        case "input":
+            let res = inputText;
+
+            // Toggle 1: Prepend and/or append \n\n to user input.
+            // Fixes Story mode's inline insertion leaving no paragraph gap before/after user input.
+            // Works independently of formatting type and storyModeFormatting.
+            if (PF.inputNewlines === "prepend" || PF.inputNewlines === "both") {
+                res = "\n\n" + res.trimStart();
+             }
+            if (PF.inputNewlines === "append" || PF.inputNewlines === "both") {
+                res = res.trimEnd() + "\n\n";
+            }
+
+            // Toggle 2: Apply full formatting pipeline to user input in Story mode.
+            if (PF.formattingType && PF.formattingType !== "none" && PF.storyModeFormatting) {
+                res = applyFormatting(res, PF.formattingType);
+                res = adjustNewlines(res);
+                res = applyIndentation(res);
+            }
+            state.ParagraphFix = PF;
+            return res;
+
         case "output":
             // If formatting is "none", return unchanged
             if (!PF.formattingType || PF.formattingType === "none") {
@@ -374,9 +422,22 @@ function ParagraphFix(hook, inputText) {
     }
 }
 ````
-8. Select the ```Context``` tab on the left
+8. Select the Input tab on the left
 9. Delete all code within said tab
-10. Copy and paste the following code into your empty ```Context``` tab:
+10. Copy and paste the following code into your empty Input tab:
+````js
+// Your "Input" tab should look like this
+const modifier = (text) => {
+  // Your other input modifier scripts go here (preferred)
+  text = ParagraphFix("input", text);
+  // Your other input modifier scripts go here (alternative)
+  return {text};
+};
+modifier(text);
+````
+11. Select the ```Context``` tab on the left
+12. Delete all code within said tab
+13. Copy and paste the following code into your empty ```Context``` tab:
 ````js
 // Your "Context" tab should look like this
 const modifier = (text) => {
@@ -387,9 +448,9 @@ const modifier = (text) => {
 };
 modifier(text);
 ````
-11. Select the ```Output``` tab on the left
-12. Delete all code within said tab
-13. Copy and paste the following code into your empty ```Output``` tab:
+14. Select the ```Output``` tab on the left
+15. Delete all code within said tab
+16. Copy and paste the following code into your empty ```Output``` tab:
 ````js
 // Your "Output" tab should look like this
 const modifier = (text) => {
@@ -400,9 +461,9 @@ const modifier = (text) => {
 };
 modifier(text);
 ````
-14. Click the big yellow ```SAVE``` button in the top right corner
-15. And you're done!
-16. Keep in mind that any adventures played from your scenario will include the Paragraph Fix (this also applies retroactively)
+17. Click the big yellow ```SAVE``` button in the top right corner
+18. And you're done!
+19. Keep in mind that any adventures played from your scenario will include the Paragraph Fix (this also applies retroactively)
 ## Additional Resources
 ### Simple Test Scenario
 - [Paragraph Fix](https://play.aidungeon.com/scenario/ltX9eOIT1KHe/modular-scripting-base-paragraph-fix-suggestions-and-feedback)
