@@ -428,9 +428,9 @@ function ParagraphFix(hook, inputText) {
 ````js
 // Your "Input" tab should look like this
 const modifier = (text) => {
-  // Your other input modifier scripts go here (preferred)
+  // Your other input modifier scripts go here
   text = ParagraphFix("input", text);
-  // Your other input modifier scripts go here (alternative)
+  // Your other input modifier scripts go here
   return {text};
 };
 modifier(text);
@@ -441,9 +441,9 @@ modifier(text);
 ````js
 // Your "Context" tab should look like this
 const modifier = (text) => {
-  // Your other context modifier scripts go here (preferred)
+  // Your other context modifier scripts go here
   text = ParagraphFix("context", text);
-  // Your other context modifier scripts go here (alternative)
+  // Your other context modifier scripts go here
   return {text};
 };
 modifier(text);
@@ -454,9 +454,9 @@ modifier(text);
 ````js
 // Your "Output" tab should look like this
 const modifier = (text) => {
-  // Your other output modifier scripts go here (preferred)
+  // Your other output modifier scripts go here
   text = ParagraphFix("output", text);
-  // Your other output modifier scripts go here (alternative)
+  // Your other output modifier scripts go here
   return {text};
 };
 modifier(text);
