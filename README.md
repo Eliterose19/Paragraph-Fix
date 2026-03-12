@@ -91,9 +91,10 @@ function ParagraphFix(hook, inputText) {
     
     // Default settings
     const DEFAULT_FORMATTING_TYPE = "none"; // "none", "basic", "empty-line", "newline"
-    const DEFAULT_INDENT_PARAGRAPHS = false;
-    const DEFAULT_STORY_MODE_FORMATTING = false; // Applies full formatting pipeline to user input in Story mode
-    const DEFAULT_INPUT_NEWLINES = "none"; // "none", "prepend", "append", "both" // Applies newlines to the beggining or end of story actions
+    const DEFAULT_INDENT_PARAGRAPHS = false; // "true" or "false"
+    const DEFAULT_STORY_MODE_FORMATTING = false; // "true" or "false"
+    const DEFAULT_INPUT_NEWLINES = "none"; // "none", "prepend", "append", "both"
+    const DEFAULT_PIN_CONFIG_CARD = false; // "true" or "false"
     
     // Initialize or retrieve state
     const PF = (function() {
@@ -106,7 +107,8 @@ function ParagraphFix(hook, inputText) {
             formattingType: DEFAULT_FORMATTING_TYPE,
             indentParagraphs: DEFAULT_INDENT_PARAGRAPHS,
             storyModeFormatting: DEFAULT_STORY_MODE_FORMATTING,
-            inputNewlines: DEFAULT_INPUT_NEWLINES
+            inputNewlines: DEFAULT_INPUT_NEWLINES,
+            pinConfigCard: DEFAULT_PIN_CONFIG_CARD
         };
     })();
     
@@ -164,66 +166,72 @@ function ParagraphFix(hook, inputText) {
             type: "class",
             title: "Configure Paragraph Fix",
             keys: "Edit the entry above to configure the Paragraph Fix",
-            entry: "> The Paragraph Fix ensures consistent spacing in your adventure. You may configure the following settings by replacing the current values with your desired options.\n" +
-                   "> Formatting Type: " + PF.formattingType + "\n" +
-                   "> Indent Paragraphs: " + PF.indentParagraphs + "\n" +
-                   "> Story Mode Formatting: " + PF.storyModeFormatting + "\n" +
-                   "> Input Newlines: " + PF.inputNewlines + "\n\n" +
-                   "> Available formatting types:\n" +
-                   "> - none: No formatting applied\n" +
-                   "> - basic: Basic formatting (converts multiple spaces/newlines to double newlines)\n" +
-                   "> - empty-line: Empty line dialogue formatting (adds spacing before quotes except after commas)\n" +
-                   "> - newline: Newline dialogue formatting (basic + newlines before quotes)\n\n" +
-                   "> Indent Paragraphs adds 4-space indents to new paragraphs\n" +
-                   "> Input Newlines controls \\n\\n placement on user input: none, prepend (before text), append (after text), or both\n" +
-                   "> Story Mode Formatting applies the full formatting pipeline to user input in Story mode",
-            description: "The Paragraph Fix automatically applies consistent spacing and dialogue formatting to your story output. Set formatting type to 'none' to disable all formatting, and set indent paragraphs to 'true' or 'false' to control paragraph indentation. Story Mode Formatting applies the full formatting pipeline to Story mode user input. Prepend Input Newlines ensures user input starts or ends on its own paragraph in Story mode."
+            entry: (
+                "> The Paragraph Fix ensures consistent spacing and formatting in your adventure. Edit the settings below to adjust how it behaves.\n" +
+                "> Formatting Type: " + PF.formattingType + "\n" +
+                "> Indent Paragraphs: " + PF.indentParagraphs + "\n" +
+                "> Story Mode Formatting: " + PF.storyModeFormatting + "\n" +
+                "> Input Newlines: " + PF.inputNewlines + "\n" +
+                "> Pin this config card near the top: " + PF.pinConfigCard
+            ),
+            description: (
+                "> Formatting Type controls how output text is reformatted:\n" +
+                "> - none: No formatting applied\n" +
+                "> - basic: Converts multiple spaces and newlines to double newlines\n" +
+                "> - empty-line: Adds spacing before quotes except after commas\n" +
+                "> - newline: Basic formatting plus newlines before quotes\n\n" +
+                "> Indent Paragraphs adds a 4-space indent to new paragraphs\n" +
+                "> (true or false)\n\n" +
+                "> Story Mode Formatting applies the full formatting pipeline to user input in Story mode\n" +
+                "> (true or false)\n\n" +
+                "> Input Newlines adds \\n\\n before and/or after user input actions, ensuring Story mode\n" +
+                "> insertions don't run inline with surrounding output\n" +
+                "> (none, prepend, append, or both)\n\n" +
+                "> Pin this config card near the top keeps this card pinned high in your story cards list\n" +
+                "> (true or false)"
+            )
         };
     }
     
     function extractSettings(text) {
         const settings = {};
         const lines = text.toLowerCase().replace(/[^a-z0-9:\->]+/g, "").split(">");
-        
+
         for (const line of lines) {
             const parts = line.split(":");
             if (parts.length !== 2) continue;
-            
+
             const key = parts[0].trim();
             const value = parts[1].trim();
-            
+
+            const trueValues = ["true", "t", "yes", "y", "on"];
+            const falseValues = ["false", "f", "no", "n", "off"];
+
             if (key.includes("formatting") && key.includes("type")) {
                 const validTypes = ["none", "basic", "empty-line", "emptyline", "newline"];
                 if (validTypes.includes(value)) {
                     settings.formattingType = value.replace("emptyline", "empty-line");
                 }
             }
-            
+
             if (key.includes("indent") && key.includes("paragraphs")) {
-                const trueValues = ["true", "t", "yes", "y", "on"];
-                const falseValues = ["false", "f", "no", "n", "off"];
-                if (trueValues.includes(value)) {
-                    settings.indentParagraphs = true;
-                } else if (falseValues.includes(value)) {
-                    settings.indentParagraphs = false;
-                }
+                if (trueValues.includes(value)) settings.indentParagraphs = true;
+                else if (falseValues.includes(value)) settings.indentParagraphs = false;
             }
 
             if (key.includes("story") && key.includes("mode")) {
-                const trueValues = ["true", "t", "yes", "y", "on"];
-                const falseValues = ["false", "f", "no", "n", "off"];
-                if (trueValues.includes(value)) {
-                    settings.storyModeFormatting = true;
-                } else if (falseValues.includes(value)) {
-                    settings.storyModeFormatting = false;
-                }
+                if (trueValues.includes(value)) settings.storyModeFormatting = true;
+                else if (falseValues.includes(value)) settings.storyModeFormatting = false;
             }
 
             if (key.includes("input") && key.includes("newlines")) {
                 const validTypes = ["none", "prepend", "append", "both"];
-                if (validTypes.includes(value)) {
-                    settings.inputNewlines = value;
-                }
+                if (validTypes.includes(value)) settings.inputNewlines = value;
+            }
+
+            if (key.includes("pin")) {
+                if (trueValues.includes(value)) settings.pinConfigCard = true;
+                else if (falseValues.includes(value)) settings.pinConfigCard = false;
             }
         }
 
@@ -273,42 +281,23 @@ function ParagraphFix(hook, inputText) {
                 }
             }
         } else {
-            // If title matches but keys don't, repair the keys
-            if (configCard.title === template.title && configCard.keys !== template.keys) {
-                configCard.keys = template.keys;
-            }
-            
-            // If keys match but title doesn't, repair the title
-            if (configCard.keys === template.keys && configCard.title !== template.title) {
-                configCard.title = template.title;
-            }
-            
-            // If partial matches, repair both title and keys
-            if (configCard.title !== template.title && configCard.keys !== template.keys) {
-                configCard.title = template.title;
-                configCard.keys = template.keys;
-            }
-            
-            // Always update the template parts but preserve user's settings
-            const userSettings = extractSettings(configCard.entry);
-            if (userSettings.formattingType) {
-                PF.formattingType = userSettings.formattingType;
-            }
-            if (typeof userSettings.indentParagraphs === "boolean") {
-                PF.indentParagraphs = userSettings.indentParagraphs;
-            }
-            if (typeof userSettings.storyModeFormatting === "boolean") {
-                PF.storyModeFormatting = userSettings.storyModeFormatting;
-            }
-            if (userSettings.inputNewlines) {
-                PF.inputNewlines = userSettings.inputNewlines;
-            }
+            // Repair title/keys if damaged
+            if (configCard.title !== template.title) configCard.title = template.title;
+            if (configCard.keys !== template.keys) configCard.keys = template.keys;
 
-            // Update with current settings
+            // Read user's settings back from the card and apply them
+            const userSettings = extractSettings(configCard.entry);
+            if (userSettings.formattingType !== undefined) PF.formattingType = userSettings.formattingType;
+            if (typeof userSettings.indentParagraphs === "boolean") PF.indentParagraphs = userSettings.indentParagraphs;
+            if (typeof userSettings.storyModeFormatting === "boolean") PF.storyModeFormatting = userSettings.storyModeFormatting;
+            if (userSettings.inputNewlines !== undefined) PF.inputNewlines = userSettings.inputNewlines;
+            if (typeof userSettings.pinConfigCard === "boolean") PF.pinConfigCard = userSettings.pinConfigCard;
+
+            // Rewrite card with current settings so it stays canonical
             const updatedTemplate = getConfigCardTemplate();
             configCard.entry = updatedTemplate.entry;
             configCard.description = updatedTemplate.description;
-            
+
             return configCard;
         }
         
@@ -354,25 +343,33 @@ function ParagraphFix(hook, inputText) {
             }).join('\n');
         } else {
             // Add indentation after paragraph breaks, but not to dialogue/commands
-            return text.replace(/\n\n(\s*)(?=\S)(?!>)/g, (match, spaces) => {
-                return '\n\n    ';
-            });
+                        return text.replace(/\n\n\s*(?=\S)(?!>)/g, () => '\n\n    ');
         }
     }
     
     // Main logic based on hook
     switch (hook) {
-        case "context":
-            // Remove indentation from context so AI doesn't see it
-            let contextResult = inputText.replace(/^    /gm, "");
-            
-            // Ensure config card exists and is properly configured
-            createOrRepairCard();
-            
+        case "context": {
+            // Remove indentation from context so the AI doesn't see it
+            const contextResult = inputText.replace(/^    /gm, "");
+
+            // Ensure config card exists, is properly formed, and settings are read back from it
+            const configCard = createOrRepairCard();
+
+            // Pin config card if enabled
+            if (PF.pinConfigCard && configCard) {
+                const index = storyCards.indexOf(configCard);
+                if (0 < index) {
+                    storyCards.splice(index, 1);
+                    storyCards.unshift(configCard);
+                }
+            }
+
             state.ParagraphFix = PF;
             return contextResult;
+        }
 
-        case "input":
+        case "input": {
             let res = inputText;
 
             // Toggle 1: Prepend and/or append \n\n to user input.
@@ -380,7 +377,7 @@ function ParagraphFix(hook, inputText) {
             // Works independently of formatting type and storyModeFormatting.
             if (PF.inputNewlines === "prepend" || PF.inputNewlines === "both") {
                 res = "\n\n" + res.trimStart();
-             }
+            }
             if (PF.inputNewlines === "append" || PF.inputNewlines === "both") {
                 res = res.trimEnd() + "\n\n";
             }
@@ -393,8 +390,9 @@ function ParagraphFix(hook, inputText) {
             }
             state.ParagraphFix = PF;
             return res;
+        }
 
-        case "output":
+        case "output": {
             // If formatting is "none", return unchanged
             if (!PF.formattingType || PF.formattingType === "none") {
                 state.ParagraphFix = PF;
@@ -415,7 +413,8 @@ function ParagraphFix(hook, inputText) {
 
             state.ParagraphFix = PF;
             return result;
-            
+        }
+
         default:
             state.ParagraphFix = PF;
             return inputText;
