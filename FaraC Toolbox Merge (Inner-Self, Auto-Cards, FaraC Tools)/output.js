@@ -1,4 +1,3 @@
-```js
 // Your "Output" tab should look like this
 handleToolboxOutput(); 
 const modifier = (text) => {
